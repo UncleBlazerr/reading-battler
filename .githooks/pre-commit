@@ -1,0 +1,10 @@
+#!/bin/sh
+# Red/green gate: block the commit if the typecheck or unit tests fail.
+#
+# Enabled automatically via `npm install` (the "prepare" script points
+# core.hooksPath here). To skip in an emergency: git commit --no-verify
+set -e
+
+echo "▶ pre-commit: running typecheck + tests…"
+npm run --silent verify
+echo "✓ pre-commit: all green"
