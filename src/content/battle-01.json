@@ -1,0 +1,21 @@
+{
+  "id": "battle-01",
+  "title": "The Word Goblin",
+  "enemy": {
+    "name": "Word Goblin",
+    "maxHp": 100
+  },
+  "sentenceWords": ["The", "big", "dog", "ran", "to", "the", "park"],
+  "difficultyTier": 1,
+  "prompts": [
+    { "targetWords": ["dog"], "damage": 20 },
+    { "targetWords": ["big"], "damage": 20 },
+    { "targetWords": ["ran"], "damage": 20 },
+    { "targetWords": ["park"], "damage": 20 },
+    {
+      "targetWords": ["The", "the"],
+      "damage": 30,
+      "spokenPrompt": "Find both words that say the"
+    }
+  ]
+}
