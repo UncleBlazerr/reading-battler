@@ -23,16 +23,16 @@ interface CardView {
 }
 
 const CARD = {
-  height: 60,
-  minWidth: 92,
-  maxWidth: 150,
-  radius: 12,
+  height: 52,
+  minWidth: 72,
+  maxWidth: 118,
+  radius: 10,
   gap: 14,
-  rowGap: 16,
-  fontSize: 26,
-  padX: 26,
+  rowGap: 14,
+  fontSize: 22,
+  padX: 16,
   margin: 40,
-  baseY: 512,
+  baseY: 516,
 } as const;
 
 const CARD_COLORS = {
