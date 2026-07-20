@@ -20,7 +20,15 @@ Pick a magic element, press **Play**, and tap the word the goblin asks for.
 | `npm run dev` | Vite dev server (local, tablet-testable on your LAN IP) |
 | `npm run build` | Typecheck (`tsc`) + production build to `dist/` |
 | `npm test` | Deterministic validation unit tests (Node test runner) |
+| `npm run verify` | Typecheck + tests (what the pre-commit hook runs) |
 | `npm run preview` | Serve the production build locally |
+
+### Pre-commit gate
+
+`npm install` auto-configures a git hook (`.githooks/pre-commit`, via the
+`prepare` script) that runs `npm run verify` and **blocks the commit if the
+typecheck or tests fail** — a red/green safety net so we don't commit breakage.
+Emergency bypass: `git commit --no-verify`.
 
 ## Where things are
 

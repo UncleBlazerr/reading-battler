@@ -55,6 +55,14 @@ decisions live in `docs/adr/`, not here.
 5. Minor polish: "Word Goblin" label appears twice (HP text + under enemy);
    prompt/label vertical spacing is a touch tight.
 
+### Test / CI gate
+
+- `npm run verify` = `typecheck` + unit tests.
+- `.githooks/pre-commit` runs `verify` and **blocks red commits**; auto-enabled
+  on `npm install` via the `prepare` script. Verified red→blocked, green→passes.
+- Next: add scene-level/integration coverage (e.g. a headless Playwright smoke
+  test in CI) and wire a GitHub Actions workflow when we set up remote CI.
+
 ### Suggested next rung
 
 Chain 2-3 find-the-word battles into a **Level**, then add the **comprehension
