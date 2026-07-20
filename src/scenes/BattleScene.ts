@@ -14,10 +14,35 @@ interface CardView {
   index: number;
   word: string;
   container: Phaser.GameObjects.Container;
-  bg: Phaser.GameObjects.Rectangle;
+  gfx: Phaser.GameObjects.Graphics;
   label: Phaser.GameObjects.Text;
+  hit: Phaser.GameObjects.Rectangle;
+  width: number;
+  homeX: number;
   found: boolean;
 }
+
+const CARD = {
+  height: 60,
+  minWidth: 92,
+  maxWidth: 150,
+  radius: 12,
+  gap: 14,
+  rowGap: 16,
+  fontSize: 26,
+  padX: 26,
+  margin: 40,
+  baseY: 512,
+} as const;
+
+const CARD_COLORS = {
+  fill: 0x1c2233,
+  stroke: 0x3a465e,
+  text: "#ffffff",
+  foundFill: 0x24402a,
+  foundStroke: 0x8bd450,
+  foundText: "#bff29a",
+} as const;
 
 export class BattleScene extends Phaser.Scene {
   private readonly battle = battleData as FindWordBattle;
@@ -155,63 +180,91 @@ export class BattleScene extends Phaser.Scene {
   // ---- Cards ---------------------------------------------------------------
 
   private buildCards(): void {
-    const gap = 14;
-    const rowY = 500;
-    const maxRowWidth = W - 60;
+    const words = this.battle.sentenceWords;
+    const usable = W - CARD.margin * 2;
 
-    const widths = this.battle.sentenceWords.map((w) => Math.max(90, w.length * 24 + 44));
+    // One uniform card width for every word — the widest word (plus padding)
+    // sets it, clamped so cards stay tidy regardless of vocabulary.
+    const widest = Math.max(...words.map((w) => this.measureWord(w)));
+    const cardW = Phaser.Math.Clamp(Math.ceil(widest) + CARD.padX * 2, CARD.minWidth, CARD.maxWidth);
 
-    // Simple greedy wrap into rows.
-    const rows: number[][] = [[]];
-    let rowWidth = 0;
-    this.battle.sentenceWords.forEach((_, i) => {
-      const wpx = widths[i] + gap;
-      if (rowWidth + wpx > maxRowWidth && rows[rows.length - 1].length > 0) {
-        rows.push([]);
-        rowWidth = 0;
-      }
-      rows[rows.length - 1].push(i);
-      rowWidth += wpx;
-    });
+    // How many uniform cards fit per row, then balance rows so they're even.
+    const perRowFit = Math.max(1, Math.floor((usable + CARD.gap) / (cardW + CARD.gap)));
+    const rowCount = Math.ceil(words.length / perRowFit);
+    const perRow = Math.ceil(words.length / rowCount);
+
+    const rows: number[][] = [];
+    for (let i = 0; i < words.length; i += perRow) {
+      rows.push(words.map((_, idx) => idx).slice(i, i + perRow));
+    }
+
+    const totalHeight = rows.length * CARD.height + (rows.length - 1) * CARD.rowGap;
+    const startY = CARD.baseY - totalHeight / 2 + CARD.height / 2;
 
     rows.forEach((row, r) => {
-      const totalW = row.reduce((s, i) => s + widths[i], 0) + gap * (row.length - 1);
-      let x = W / 2 - totalW / 2;
-      const y = rowY + r * 92;
-      for (const i of row) {
-        const cw = widths[i];
-        const word = this.battle.sentenceWords[i];
-        const bg = this.add.rectangle(0, 0, cw, 76, 0x1c2233).setStrokeStyle(3, 0x3a465e);
-        const label = this.add
-          .text(0, 0, word, { fontFamily: "Georgia, 'Times New Roman', serif", fontSize: "34px", color: "#ffffff" })
-          .setOrigin(0.5);
-        const container = this.add.container(x + cw / 2, y, [bg, label]);
-        bg.setInteractive({ useHandCursor: true });
-        const card: CardView = { index: i, word, container, bg, label, found: false };
-        bg.on("pointerdown", () => this.onCardTap(card));
-        this.cards.push(card);
-        x += cw + gap;
-      }
+      const rowWidth = row.length * cardW + (row.length - 1) * CARD.gap;
+      const startX = W / 2 - rowWidth / 2 + cardW / 2;
+      const y = startY + r * (CARD.height + CARD.rowGap);
+      row.forEach((i, col) => {
+        const x = startX + col * (cardW + CARD.gap);
+        this.cards.push(this.makeCard(i, words[i], x, y, cardW));
+      });
     });
+  }
+
+  /** Width in px of a word at the card font (used to size cards uniformly). */
+  private measureWord(word: string): number {
+    const probe = this.add
+      .text(0, 0, word, { fontFamily: "Arial, sans-serif", fontStyle: "bold", fontSize: `${CARD.fontSize}px` })
+      .setVisible(false);
+    const w = probe.width;
+    probe.destroy();
+    return w;
+  }
+
+  private makeCard(index: number, word: string, x: number, y: number, cardW: number): CardView {
+    const gfx = this.add.graphics();
+    const label = this.add
+      .text(0, 0, word, {
+        fontFamily: "Arial, sans-serif",
+        fontStyle: "bold",
+        fontSize: `${CARD.fontSize}px`,
+        color: CARD_COLORS.text,
+      })
+      .setOrigin(0.5);
+    const hit = this.add.rectangle(0, 0, cardW, CARD.height, 0xffffff, 0.001);
+    const container = this.add.container(x, y, [gfx, hit, label]);
+    const card: CardView = { index, word, container, gfx, label, hit, width: cardW, homeX: x, found: false };
+    this.drawCard(card, cardW, false);
+    hit.setInteractive({ useHandCursor: true });
+    hit.on("pointerdown", () => this.onCardTap(card));
+    return card;
+  }
+
+  private drawCard(card: CardView, cardW: number, found: boolean): void {
+    const fill = found ? CARD_COLORS.foundFill : CARD_COLORS.fill;
+    const stroke = found ? CARD_COLORS.foundStroke : CARD_COLORS.stroke;
+    card.gfx.clear();
+    card.gfx.fillStyle(fill, 1);
+    card.gfx.lineStyle(3, stroke, 1);
+    card.gfx.fillRoundedRect(-cardW / 2, -CARD.height / 2, cardW, CARD.height, CARD.radius);
+    card.gfx.strokeRoundedRect(-cardW / 2, -CARD.height / 2, cardW, CARD.height, CARD.radius);
+    card.label.setColor(found ? CARD_COLORS.foundText : CARD_COLORS.text);
   }
 
   private resetCards(): void {
     for (const card of this.cards) {
       card.found = false;
-      card.bg.setFillStyle(0x1c2233);
-      card.bg.setStrokeStyle(3, 0x3a465e);
-      card.label.setColor("#ffffff");
-      card.bg.setInteractive({ useHandCursor: true });
+      this.drawCard(card, card.width, false);
+      card.hit.setInteractive({ useHandCursor: true });
       card.container.setAlpha(1);
     }
   }
 
   private markFound(card: CardView): void {
     card.found = true;
-    card.bg.setFillStyle(0x24402a);
-    card.bg.setStrokeStyle(3, 0x8bd450);
-    card.label.setColor("#bff29a");
-    card.bg.disableInteractive();
+    this.drawCard(card, card.width, true);
+    card.hit.disableInteractive();
   }
 
   // ---- Prompt flow ---------------------------------------------------------
@@ -286,10 +339,18 @@ export class BattleScene extends Phaser.Scene {
   private softFail(card: CardView): void {
     this.sound.play("wrong", { volume: 0.5 });
     this.enemyTaunt();
-    // Shake the wrongly-tapped card; no damage, no penalty.
-    this.tweens.add({ targets: card.container, x: card.container.x + 8, duration: 50, yoyo: true, repeat: 3 });
-    const orig = card.container.x;
-    this.time.delayedCall(260, () => card.container.setX(orig));
+    // Shake the wrongly-tapped card; no damage, no penalty. Always anchor to the
+    // card's fixed home X so repeated wrong taps can't drift it out of place.
+    this.tweens.killTweensOf(card.container);
+    card.container.setX(card.homeX);
+    this.tweens.add({
+      targets: card.container,
+      x: card.homeX + 8,
+      duration: 50,
+      yoyo: true,
+      repeat: 3,
+      onComplete: () => card.container.setX(card.homeX),
+    });
   }
 
   private advance(): void {
