@@ -6,6 +6,38 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-07-20 — Iteration 3: Kenney sprite art (UI + monster)
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **Real monster.** Replaced the code-drawn goblin with a monster assembled from
+  the **Kenney Monster Builder Pack** (green body + cute eyes + happy mouth +
+  arms/legs, layered in a container). Hurt = red tint + wobble; defeat unchanged.
+- **Kenney UI sprites (UI Pack: Adventure).** Word cards are now 9-slice wood
+  `button_brown` (cream center, dark-brown bold text — very readable); "found"
+  state is a green tint. HP bar sits in a wood `panel_brown` frame. Start-screen
+  element chips + PLAY are the same wood buttons (selected = green tint).
+- Assets are the **Double (2x)** PNGs for crispness, in `public/assets/{ui,monster}/`
+  with each pack's `LICENSE.txt` (CC0). Loaded in `BootScene`.
+- Layout fixes: monster scaled/raised so it clears the quest banner; prompt UI
+  depth lifted above the enemy; banner given a text stroke for contrast.
+
+### Verified
+
+Build + typecheck pass · 12/12 tests pass · headless playthrough clean ·
+screenshots confirm start, battle, multi-word bonus prompt (green found-card,
+"1/2 found"), and HP drain.
+
+### Still open
+
+Picture-assist toggle · tablet playtest · then Level + comprehension boss.
+Note: the monster's arms read a little like a ring around the body — fine for
+now, could refine limb positions later.
+
+---
+
 ## 2026-07-20 — Iteration 2: Kenney audio + on-screen objective
 
 **Status: complete and verified.**

@@ -8,41 +8,33 @@ import { confetti, floatingDamage, playAttack } from "../game/effects";
 
 const W = 960;
 const H = 640;
-const ENEMY = new Phaser.Math.Vector2(W / 2, 190);
+const ENEMY = new Phaser.Math.Vector2(W / 2, 168);
 
 interface CardView {
   index: number;
   word: string;
   container: Phaser.GameObjects.Container;
-  gfx: Phaser.GameObjects.Graphics;
+  btn: Phaser.GameObjects.NineSlice;
   label: Phaser.GameObjects.Text;
-  hit: Phaser.GameObjects.Rectangle;
   width: number;
   homeX: number;
   found: boolean;
 }
 
 const CARD = {
-  height: 52,
-  minWidth: 72,
-  maxWidth: 118,
-  radius: 10,
+  height: 58,
+  minWidth: 88,
+  maxWidth: 136,
   gap: 14,
   rowGap: 14,
   fontSize: 22,
-  padX: 16,
+  padX: 24,
   margin: 40,
-  baseY: 516,
+  baseY: 514,
 } as const;
 
-const CARD_COLORS = {
-  fill: 0x1c2233,
-  stroke: 0x3a465e,
-  text: "#ffffff",
-  foundFill: 0x24402a,
-  foundStroke: 0x8bd450,
-  foundText: "#bff29a",
-} as const;
+const CARD_TINT = { normal: 0xffffff, found: 0x8fd06a } as const;
+const CARD_TEXT = { normal: "#4a2f16", found: "#274d16" } as const;
 
 export class BattleScene extends Phaser.Scene {
   private readonly battle = battleData as FindWordBattle;
@@ -53,7 +45,8 @@ export class BattleScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
 
   private enemy!: Phaser.GameObjects.Container;
-  private enemyHurt!: Phaser.GameObjects.Ellipse;
+  private enemyBody!: Phaser.GameObjects.Image;
+  private hpBarWidth = 0;
 
   private cards: CardView[] = [];
   private promptText!: Phaser.GameObjects.Text;
@@ -92,19 +85,20 @@ export class BattleScene extends Phaser.Scene {
 
   private buildEnemy(): void {
     const c = this.add.container(ENEMY.x, ENEMY.y);
-    const body = this.add.ellipse(0, 0, 190, 170, 0x6aa84f).setStrokeStyle(4, 0x3d6b2c);
-    const belly = this.add.ellipse(0, 25, 110, 90, 0x8bc46a);
-    const earL = this.add.triangle(-95, -30, 0, 0, 40, -20, 20, 40, 0x6aa84f);
-    const earR = this.add.triangle(95, -30, 0, 0, -40, -20, -20, 40, 0x6aa84f);
-    const eyeL = this.add.circle(-38, -20, 22, 0xffffff);
-    const eyeR = this.add.circle(38, -20, 22, 0xffffff);
-    const pupL = this.add.circle(-38, -16, 9, 0x101018);
-    const pupR = this.add.circle(38, -16, 9, 0x101018);
-    const mouth = this.add.ellipse(0, 35, 60, 26, 0x2a1a1a);
-    this.enemyHurt = this.add.ellipse(0, 0, 190, 170, 0xff3b3b, 0).setName("hurt");
+    // Assembled from Kenney Monster Builder parts, layered back-to-front.
+    const armL = this.add.image(-104, 30, "m-arm").setScale(0.6).setFlipX(true);
+    const armR = this.add.image(104, 30, "m-arm").setScale(0.6);
+    const legL = this.add.image(-42, 92, "m-leg").setScale(0.58);
+    const legR = this.add.image(42, 92, "m-leg").setScale(0.58).setFlipX(true);
+    const body = this.add.image(0, 0, "m-body").setScale(0.62);
+    const eyeL = this.add.image(-38, -28, "m-eye").setScale(0.5);
+    const eyeR = this.add.image(38, -28, "m-eye").setScale(0.5);
+    const mouth = this.add.image(0, 42, "m-mouth").setScale(0.6);
+    this.enemyBody = body;
 
-    c.add([earL, earR, body, belly, eyeL, eyeR, pupL, pupR, mouth, this.enemyHurt]);
+    c.add([armL, armR, legL, legR, body, eyeL, eyeR, mouth]);
     c.setDepth(10);
+    c.setScale(0.66);
     this.enemy = c;
 
     // Idle bob.
@@ -119,8 +113,8 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private hurtEnemy(): void {
-    this.enemyHurt.setAlpha(0.7);
-    this.tweens.add({ targets: this.enemyHurt, alpha: 0, duration: 260 });
+    this.enemyBody.setTint(0xff6b6b);
+    this.time.delayedCall(220, () => this.enemyBody.clearTint());
     this.tweens.add({ targets: this.enemy, angle: { from: -6, to: 6 }, duration: 60, yoyo: true, repeat: 3, onComplete: () => this.enemy.setAngle(0) });
   }
 
@@ -132,17 +126,36 @@ export class BattleScene extends Phaser.Scene {
   // ---- HP bar --------------------------------------------------------------
 
   private buildHpBar(): void {
-    this.add.rectangle(280, 70, 400, 26, 0x2a2a35).setOrigin(0, 0.5).setStrokeStyle(2, 0x444a5e);
-    this.hpFill = this.add.rectangle(280, 70, 400, 26, 0xff5b6a).setOrigin(0, 0.5);
+    const cx = W / 2;
+    const cy = 66;
+    const panelW = 440;
+    const panelH = 52;
+    this.add.nineslice(cx, cy, "ui-panel", undefined, panelW, panelH, 24, 24, 24, 24).setDepth(5);
+
+    const barW = panelW - 52;
+    const barH = 18;
+    this.hpBarWidth = barW;
+    const barX = cx - barW / 2;
+    this.add.rectangle(barX, cy, barW, barH, 0x2c1c10).setOrigin(0, 0.5).setDepth(6);
+    this.hpFill = this.add.rectangle(barX, cy, barW, barH, 0xe23b3b).setOrigin(0, 0.5).setDepth(6);
+
     this.hpText = this.add
-      .text(W / 2, 40, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#c8cde0" })
-      .setOrigin(0.5);
+      .text(cx, cy, "", {
+        fontFamily: "Arial, sans-serif",
+        fontStyle: "bold",
+        fontSize: "18px",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5)
+      .setDepth(7);
     this.updateHpBar();
   }
 
   private updateHpBar(): void {
     const frac = Phaser.Math.Clamp(this.hp / this.battle.enemy.maxHp, 0, 1);
-    this.tweens.add({ targets: this.hpFill, displayWidth: 400 * frac, duration: 250, ease: "Quad.easeOut" });
+    this.tweens.add({ targets: this.hpFill, displayWidth: this.hpBarWidth * frac, duration: 250, ease: "Quad.easeOut" });
     this.hpText.setText(`${this.battle.enemy.name}    HP ${this.hp} / ${this.battle.enemy.maxHp}`);
   }
 
@@ -157,20 +170,25 @@ export class BattleScene extends Phaser.Scene {
         fontSize: "30px",
         color: "#ffffff",
         align: "center",
+        stroke: "#000000",
+        strokeThickness: 5,
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(20);
 
     // Replay speaker button — child can hear the word again as often as needed.
     // Repositioned next to the banner each prompt (banner width varies).
     const bg = this.add.circle(0, 0, 26, 0x2a3348).setStrokeStyle(3, 0x6bd6ff);
     const icon = this.add.text(0, 0, "🔊", { fontSize: "26px" }).setOrigin(0.5);
     this.speaker = this.add.container(0, 338, [bg, icon]);
+    this.speaker.setDepth(20);
     bg.setInteractive({ useHandCursor: true });
     bg.on("pointerdown", () => this.speakPrompt());
 
     this.progressText = this.add
-      .text(W / 2, 392, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#9aa0b5" })
-      .setOrigin(0.5);
+      .text(W / 2, 392, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#c8cde0" })
+      .setOrigin(0.5)
+      .setDepth(20);
   }
 
   // ---- Cards ---------------------------------------------------------------
@@ -219,48 +237,37 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private makeCard(index: number, word: string, x: number, y: number, cardW: number): CardView {
-    const gfx = this.add.graphics();
+    const btn = this.add.nineslice(0, 0, "ui-button", undefined, cardW, CARD.height, 18, 18, 16, 16);
     const label = this.add
-      .text(0, 0, word, {
+      .text(0, -1, word, {
         fontFamily: "Arial, sans-serif",
         fontStyle: "bold",
         fontSize: `${CARD.fontSize}px`,
-        color: CARD_COLORS.text,
+        color: CARD_TEXT.normal,
       })
       .setOrigin(0.5);
-    const hit = this.add.rectangle(0, 0, cardW, CARD.height, 0xffffff, 0.001);
-    const container = this.add.container(x, y, [gfx, hit, label]);
-    const card: CardView = { index, word, container, gfx, label, hit, width: cardW, homeX: x, found: false };
-    this.drawCard(card, cardW, false);
-    hit.setInteractive({ useHandCursor: true });
-    hit.on("pointerdown", () => this.onCardTap(card));
+    const container = this.add.container(x, y, [btn, label]);
+    const card: CardView = { index, word, container, btn, label, width: cardW, homeX: x, found: false };
+    btn.setInteractive({ useHandCursor: true });
+    btn.on("pointerdown", () => this.onCardTap(card));
     return card;
-  }
-
-  private drawCard(card: CardView, cardW: number, found: boolean): void {
-    const fill = found ? CARD_COLORS.foundFill : CARD_COLORS.fill;
-    const stroke = found ? CARD_COLORS.foundStroke : CARD_COLORS.stroke;
-    card.gfx.clear();
-    card.gfx.fillStyle(fill, 1);
-    card.gfx.lineStyle(3, stroke, 1);
-    card.gfx.fillRoundedRect(-cardW / 2, -CARD.height / 2, cardW, CARD.height, CARD.radius);
-    card.gfx.strokeRoundedRect(-cardW / 2, -CARD.height / 2, cardW, CARD.height, CARD.radius);
-    card.label.setColor(found ? CARD_COLORS.foundText : CARD_COLORS.text);
   }
 
   private resetCards(): void {
     for (const card of this.cards) {
       card.found = false;
-      this.drawCard(card, card.width, false);
-      card.hit.setInteractive({ useHandCursor: true });
+      card.btn.setTint(CARD_TINT.normal);
+      card.label.setColor(CARD_TEXT.normal);
+      card.btn.setInteractive({ useHandCursor: true });
       card.container.setAlpha(1);
     }
   }
 
   private markFound(card: CardView): void {
     card.found = true;
-    this.drawCard(card, card.width, true);
-    card.hit.disableInteractive();
+    card.btn.setTint(CARD_TINT.found);
+    card.label.setColor(CARD_TEXT.found);
+    card.btn.disableInteractive();
   }
 
   // ---- Prompt flow ---------------------------------------------------------

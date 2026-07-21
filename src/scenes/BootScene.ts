@@ -17,6 +17,15 @@ export class BootScene extends Phaser.Scene {
     for (const el of ELEMENT_ORDER) {
       this.load.audio(ELEMENTS[el].sound, `audio/${ELEMENTS[el].sound}.mp3`);
     }
+
+    // Kenney CC0 sprite art (UI Pack: Adventure + Monster Builder Pack).
+    this.load.image("ui-button", "assets/ui/button_brown.png");
+    this.load.image("ui-panel", "assets/ui/panel_brown.png");
+    this.load.image("m-body", "assets/monster/body_greenD.png");
+    this.load.image("m-eye", "assets/monster/eye_cute_light.png");
+    this.load.image("m-mouth", "assets/monster/mouthE.png");
+    this.load.image("m-arm", "assets/monster/arm_greenC.png");
+    this.load.image("m-leg", "assets/monster/leg_greenB.png");
   }
 
   create(): void {
