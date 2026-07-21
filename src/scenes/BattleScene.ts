@@ -8,7 +8,11 @@ import { confetti, floatingDamage, playAttack } from "../game/effects";
 
 const W = 960;
 const H = 640;
-const ENEMY = new Phaser.Math.Vector2(W / 2, 168);
+// Side-on battle: player on the left, enemy on the right, facing off.
+const GROUND = 432;
+const PLAYER = new Phaser.Math.Vector2(186, GROUND);
+const CAST = new Phaser.Math.Vector2(250, 300); // where the player's attack launches from
+const ENEMY = new Phaser.Math.Vector2(760, 300);
 
 interface CardView {
   index: number;
@@ -46,6 +50,7 @@ export class BattleScene extends Phaser.Scene {
 
   private enemy!: Phaser.GameObjects.Container;
   private enemyBody!: Phaser.GameObjects.Image;
+  private player!: Phaser.GameObjects.Image;
   private hpBarWidth = 0;
 
   private cards: CardView[] = [];
@@ -73,12 +78,47 @@ export class BattleScene extends Phaser.Scene {
     this.over = false;
 
     this.add.rectangle(W / 2, H / 2, W, H, 0x0d0d12);
-    this.buildHpBar();
+    this.buildArena();
+    this.buildPlayer();
     this.buildEnemy();
+    this.buildHpBar();
     this.buildPromptUi();
     this.buildCards();
 
     this.startPrompt();
+  }
+
+  // ---- Arena / Player ------------------------------------------------------
+
+  private buildArena(): void {
+    // A simple ground line so the two combatants read as standing on a stage.
+    this.add.rectangle(W / 2, GROUND + 2, W, 4, 0x241a10).setDepth(1);
+    this.add.rectangle(W / 2, (GROUND + H) / 2, W, H - GROUND, 0x14100c).setOrigin(0.5).setDepth(0);
+  }
+
+  private buildPlayer(): void {
+    this.player = this.add
+      .image(PLAYER.x, PLAYER.y, "player-idle")
+      .setOrigin(0.5, 1)
+      .setScale(0.72)
+      .setDepth(10);
+    this.add
+      .text(PLAYER.x, GROUND + 16, "You", {
+        fontFamily: "Arial, sans-serif",
+        fontStyle: "bold",
+        fontSize: "18px",
+        color: "#c8cde0",
+      })
+      .setOrigin(0.5)
+      .setDepth(10);
+  }
+
+  private playerAttackPose(): void {
+    if (this.over) return;
+    this.player.setTexture("player-attack");
+    this.time.delayedCall(500, () => {
+      if (!this.over) this.player.setTexture("player-idle");
+    });
   }
 
   // ---- Enemy ---------------------------------------------------------------
@@ -126,10 +166,10 @@ export class BattleScene extends Phaser.Scene {
   // ---- HP bar --------------------------------------------------------------
 
   private buildHpBar(): void {
-    const cx = W / 2;
-    const cy = 66;
-    const panelW = 440;
-    const panelH = 52;
+    const cx = ENEMY.x;
+    const cy = 120;
+    const panelW = 340;
+    const panelH = 50;
     this.add.nineslice(cx, cy, "ui-panel", undefined, panelW, panelH, 24, 24, 24, 24).setDepth(5);
 
     const barW = panelW - 52;
@@ -165,7 +205,7 @@ export class BattleScene extends Phaser.Scene {
     // Quest banner — states the objective in words, including the target word,
     // so the child always knows what to find (see ADR 0003 update).
     this.promptText = this.add
-      .text(W / 2, 338, "", {
+      .text(W / 2, 56, "", {
         fontFamily: "Arial Black, Arial, sans-serif",
         fontSize: "30px",
         color: "#ffffff",
@@ -180,13 +220,13 @@ export class BattleScene extends Phaser.Scene {
     // Repositioned next to the banner each prompt (banner width varies).
     const bg = this.add.circle(0, 0, 26, 0x2a3348).setStrokeStyle(3, 0x6bd6ff);
     const icon = this.add.text(0, 0, "🔊", { fontSize: "26px" }).setOrigin(0.5);
-    this.speaker = this.add.container(0, 338, [bg, icon]);
+    this.speaker = this.add.container(0, 56, [bg, icon]);
     this.speaker.setDepth(20);
     bg.setInteractive({ useHandCursor: true });
     bg.on("pointerdown", () => this.speakPrompt());
 
     this.progressText = this.add
-      .text(W / 2, 392, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#c8cde0" })
+      .text(W / 2, 96, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#c8cde0" })
       .setOrigin(0.5)
       .setDepth(20);
   }
@@ -327,9 +367,10 @@ export class BattleScene extends Phaser.Scene {
 
     const element = resolveElement(this.elementChoice, this.hitIndex++);
     this.sound.play(ELEMENTS[element].sound, { volume: 0.6 });
+    this.playerAttackPose();
 
-    const from = card.container;
-    playAttack(this, element, from.x, from.y, ENEMY.x, ENEMY.y, () => {
+    // Projectile leaves the player (left) and flies to the enemy (right).
+    playAttack(this, element, CAST.x, CAST.y, ENEMY.x, ENEMY.y, () => {
       this.hp = Math.max(0, this.hp - outcome.damage);
       this.updateHpBar();
       floatingDamage(this, ENEMY.x, ENEMY.y - 40, outcome.damage, ELEMENTS[element].color);
@@ -384,7 +425,8 @@ export class BattleScene extends Phaser.Scene {
     this.progressText.setText("");
     this.promptText.setText("");
 
-    // Enemy defeat: topple and fade.
+    // Player celebrates; enemy topples and fades.
+    this.player.setTexture("player-cheer");
     this.tweens.add({ targets: this.enemy, angle: 90, y: ENEMY.y + 60, alpha: 0.25, duration: 700, ease: "Cubic.easeIn" });
 
     this.time.delayedCall(500, () => {

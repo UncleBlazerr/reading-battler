@@ -6,6 +6,33 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-07-20 — Iteration 5: Side-view battle with a player character
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **Player character.** Added a hero (Kenney Toon Characters — Male Adventurer,
+  CC0) on the **left**, facing the boss on the **right**, standing on a ground
+  line — a proper 1-v-1 battle view. `public/assets/player/{idle,attack,cheer}.png`.
+- **Layout reflow:** enemy moved from center to the right; enemy HP bar now sits
+  above the enemy; quest banner + progress moved to the top; a dark "stage"
+  strip + ground line anchor the two combatants.
+- **Projectiles leave the originator.** Attacks now launch from the player's
+  cast point (left) toward the enemy (right), instead of from the tapped card.
+- **Player poses react:** attack pose on cast (reverts to idle), cheer pose on win.
+
+### Verified
+
+Build + typecheck · 12/12 tests · headless playthrough clean · screenshots
+confirm the side-view layout, HP drain, multi-word bonus prompt, and win flow.
+
+### Still open
+
+Picture-assist toggle · tablet playtest · then Level + comprehension boss.
+
+---
+
 ## 2026-07-20 — Iteration 4: Male-voice word reading
 
 **Status: complete and verified.**
