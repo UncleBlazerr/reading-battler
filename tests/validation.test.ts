@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PromptTracker, normalizeWord, spokenInstructionFor } from "../src/game/validation.ts";
+import { PromptTracker, normalizeWord, questBannerFor, spokenInstructionFor } from "../src/game/validation.ts";
 
 test("normalizeWord lowercases and trims", () => {
   assert.equal(normalizeWord("  Dog "), "dog");
@@ -57,6 +57,24 @@ test("multi-target: odd damage still sums exactly (no rounding drift)", () => {
 
 test("empty target list is rejected", () => {
   assert.throws(() => new PromptTracker({ targetWords: [], damage: 10 }));
+});
+
+test("questBannerFor shows the capitalized target word", () => {
+  assert.equal(questBannerFor({ targetWords: ["dog"], damage: 20 }), 'Quest: Find the word "Dog"!');
+});
+
+test("questBannerFor handles a repeated-word multi-target prompt", () => {
+  assert.equal(
+    questBannerFor({ targetWords: ["The", "the"], damage: 30 }),
+    'Quest: Find both words that say "the"!',
+  );
+});
+
+test("questBannerFor lists distinct multi-target words", () => {
+  assert.equal(
+    questBannerFor({ targetWords: ["big", "dog"], damage: 30 }),
+    'Quest: Find "Big" and "Dog"!',
+  );
 });
 
 test("spokenInstructionFor uses override when present, else default", () => {

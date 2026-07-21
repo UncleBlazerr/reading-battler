@@ -87,11 +87,32 @@ export class PromptTracker {
 }
 
 /**
- * Builds the default spoken instruction for a prompt when the content doesn't
- * override it. The target word is spoken, never shown as text (ADR 0003).
+ * Builds the spoken instruction for a prompt (TTS) when content doesn't override
+ * it. The target word is spoken aloud.
  */
 export function spokenInstructionFor(prompt: FindWordPrompt): string {
   if (prompt.spokenPrompt) return prompt.spokenPrompt;
   const word = prompt.targetWords[0];
   return `Find the word ${word}`;
+}
+
+function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+/**
+ * Builds the on-screen quest banner, which DOES show the target word as text so
+ * the objective is always clear (ADR 0003, revised 2026-07-20). Example:
+ * `Quest: Find the word "Dog"!`
+ */
+export function questBannerFor(prompt: FindWordPrompt): string {
+  const words = prompt.targetWords;
+  if (words.length === 1) {
+    return `Quest: Find the word "${capitalize(words[0])}"!`;
+  }
+  const unique = [...new Set(words.map(normalizeWord))];
+  if (unique.length === 1) {
+    return `Quest: Find both words that say "${unique[0]}"!`;
+  }
+  return `Quest: Find ${words.map((w) => `"${capitalize(w)}"`).join(" and ")}!`;
 }

@@ -33,8 +33,9 @@ export class Speech {
     this.synth.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     if (this.voice) utter.voice = this.voice;
-    utter.rate = opts.rate ?? 0.9; // a touch slow for young ears
+    utter.rate = opts.rate ?? 0.8; // slow and clear for young ears
     utter.pitch = opts.pitch ?? 1.1;
+    utter.volume = 1;
     this.synth.speak(utter);
   }
 }

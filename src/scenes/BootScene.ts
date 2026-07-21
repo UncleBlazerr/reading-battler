@@ -8,12 +8,14 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.audio("impact", "audio/impact.wav");
-    this.load.audio("wrong", "audio/wrong.wav");
-    this.load.audio("tap", "audio/tap.wav");
-    this.load.audio("win", "audio/win.wav");
+    // Kenney.nl CC0 sounds, converted to mp3 for cross-browser support
+    // (iPad Safari can't play ogg). See public/audio/CREDITS.md.
+    this.load.audio("impact", "audio/impact.mp3");
+    this.load.audio("wrong", "audio/wrong.mp3");
+    this.load.audio("tap", "audio/tap.mp3");
+    this.load.audio("win", "audio/win.mp3");
     for (const el of ELEMENT_ORDER) {
-      this.load.audio(ELEMENTS[el].sound, `audio/${ELEMENTS[el].sound}.wav`);
+      this.load.audio(ELEMENTS[el].sound, `audio/${ELEMENTS[el].sound}.mp3`);
     }
   }
 

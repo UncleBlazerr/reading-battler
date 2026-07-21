@@ -1,0 +1,21 @@
+# Audio credits
+
+All sound effects are from **Kenney** (https://kenney.nl) and are licensed
+**CC0 1.0 (public domain)** — no attribution required, but credited here gladly.
+
+- Packs: **Interface Sounds** and **Impact Sounds** (https://kenney.nl/assets).
+- Converted from the original `.ogg` to `.mp3` for cross-browser support
+  (iPad Safari does not play `.ogg`).
+
+| File | Source (Kenney) | Used for |
+| --- | --- | --- |
+| `fire.mp3` | Impact — `impactSoft_medium_000` | Fire attack cast |
+| `lightning.mp3` | Interface — `glitch_002` | Lightning attack cast |
+| `ice.mp3` | Impact — `impactGlass_light_000` | Ice attack cast |
+| `impact.mp3` | Impact — `impactGeneric_light_000` | Attack landing hit |
+| `tap.mp3` | Interface — `click_001` | Selecting a word card |
+| `wrong.mp3` | Interface — `back_001` | Soft-fail (wrong tap) |
+| `win.mp3` | Interface — `confirmation_001` | Victory |
+
+To change a sound, drop a replacement `.mp3` here with the same filename (or
+update the keys in `src/scenes/BootScene.ts` and `src/game/elements.ts`).

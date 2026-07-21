@@ -44,3 +44,22 @@ tiny hands, and maps cleanly onto a satisfying attack.
   later rungs that reuse the same validation approach.
 - Content schema for this mechanic is a small subset of the full PRD data model;
   see `src/content/types.ts`.
+
+## Update — 2026-07-20: show the target word on screen
+
+The original decision hid the target word (audio-only) to force pure decoding.
+In practice, for pre-readers, an unclear TTS voice plus no on-screen objective
+made it hard to know what to find. **Revised:** the objective is now also shown
+as an on-screen quest banner, e.g. `Quest: Find the word "Dog"!`
+(`questBannerFor` in `src/game/validation.ts`).
+
+- **Trade-off, accepted:** showing the word lets a child solve by matching the
+  banner word to the identical sentence word (word-matching) rather than pure
+  phonetic decoding. Word-matching is still a legitimate early-literacy skill,
+  and clarity/accessibility for ages 4-6 was judged more important than strict
+  decoding validation at this stage.
+- The word is still **spoken aloud** (auto-play once + replay button), now slower
+  and with the target word repeated, so the audio channel still teaches
+  pronunciation.
+- Revisit if playtesting shows kids ignore the words and only pattern-match; a
+  future "hard mode" could hide the banner to restore the decoding challenge.

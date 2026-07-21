@@ -6,6 +6,35 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-07-20 — Iteration 2: Kenney audio + on-screen objective
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **Real audio (was placeholder).** Swapped procedural WAVs for **Kenney.nl CC0**
+  sounds (Interface + Impact packs), converted `.ogg → .mp3` with ffmpeg for
+  cross-browser support (**iPad Safari can't play ogg**). Mapping + license in
+  `public/audio/CREDITS.md`. Removed `tools/gen-placeholder-audio.mjs`.
+- **On-screen quest banner.** The objective now shows the target word as text,
+  e.g. `Quest: Find the word "Dog"!` (`questBannerFor` in `validation.ts`, with
+  tests). **This revises ADR 0003** (word was previously audio-only to force
+  decoding) — trade-off recorded in that ADR.
+- **Clearer pronunciation.** TTS slowed (rate 0.8) and now repeats the target
+  word; speaker replay button repositions next to the banner each prompt.
+- Removed the redundant "Word Goblin" label under the enemy (name is in HP bar).
+
+### Verified
+
+Build + typecheck pass · 12/12 tests pass (added 3 banner tests) · headless
+playthrough clean · mp3 assets serve (200) · screenshots confirm layout.
+
+### Still open (unchanged from iteration 1)
+
+Picture-assist toggle (item 2) · tablet playtest (item 3) · then Level + boss.
+
+---
+
 ## 2026-07-20 — Iteration 1: "Find the word" battle (PoC)
 
 **Status: complete and verified.**

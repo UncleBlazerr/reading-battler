@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import battleData from "../content/battle-01.json";
 import type { FindWordBattle } from "../content/types";
-import { PromptTracker, spokenInstructionFor } from "../game/validation";
+import { PromptTracker, questBannerFor } from "../game/validation";
 import { Speech } from "../game/speech";
 import { ELEMENTS, resolveElement, type ElementChoice } from "../game/elements";
 import { confetti, floatingDamage, playAttack } from "../game/effects";
@@ -57,6 +57,7 @@ export class BattleScene extends Phaser.Scene {
 
   private cards: CardView[] = [];
   private promptText!: Phaser.GameObjects.Text;
+  private speaker!: Phaser.GameObjects.Container;
   private progressText!: Phaser.GameObjects.Text;
 
   private promptIndex = 0;
@@ -115,15 +116,6 @@ export class BattleScene extends Phaser.Scene {
       repeat: -1,
       ease: "Sine.easeInOut",
     });
-
-    this.add
-      .text(ENEMY.x, ENEMY.y + 120, this.battle.enemy.name, {
-        fontFamily: "Arial, sans-serif",
-        fontSize: "22px",
-        color: "#9aa0b5",
-      })
-      .setOrigin(0.5)
-      .setDepth(10);
   }
 
   private hurtEnemy(): void {
@@ -157,20 +149,24 @@ export class BattleScene extends Phaser.Scene {
   // ---- Prompt UI -----------------------------------------------------------
 
   private buildPromptUi(): void {
+    // Quest banner — states the objective in words, including the target word,
+    // so the child always knows what to find (see ADR 0003 update).
     this.promptText = this.add
-      .text(W / 2 - 30, 340, "", {
+      .text(W / 2, 338, "", {
         fontFamily: "Arial Black, Arial, sans-serif",
-        fontSize: "34px",
+        fontSize: "30px",
         color: "#ffffff",
+        align: "center",
       })
       .setOrigin(0.5);
 
     // Replay speaker button — child can hear the word again as often as needed.
-    const speaker = this.add.circle(0, 0, 30, 0x2a3348).setStrokeStyle(3, 0x6bd6ff);
-    const icon = this.add.text(0, 0, "🔊", { fontSize: "30px" }).setOrigin(0.5);
-    this.add.container(W / 2 + 190, 340, [speaker, icon]);
-    speaker.setInteractive({ useHandCursor: true });
-    speaker.on("pointerdown", () => this.speakPrompt());
+    // Repositioned next to the banner each prompt (banner width varies).
+    const bg = this.add.circle(0, 0, 26, 0x2a3348).setStrokeStyle(3, 0x6bd6ff);
+    const icon = this.add.text(0, 0, "🔊", { fontSize: "26px" }).setOrigin(0.5);
+    this.speaker = this.add.container(0, 338, [bg, icon]);
+    bg.setInteractive({ useHandCursor: true });
+    bg.on("pointerdown", () => this.speakPrompt());
 
     this.progressText = this.add
       .text(W / 2, 392, "", { fontFamily: "Arial, sans-serif", fontSize: "20px", color: "#9aa0b5" })
@@ -275,8 +271,9 @@ export class BattleScene extends Phaser.Scene {
     this.resetCards();
     this.inputLocked = false;
 
-    const count = prompt.targetWords.length;
-    this.promptText.setText(count > 1 ? `Find ${count} words!` : "Find the word!");
+    this.promptText.setText(questBannerFor(prompt));
+    // Park the speaker button just to the right of the banner.
+    this.speaker.setPosition(this.promptText.x + this.promptText.displayWidth / 2 + 34, this.promptText.y);
     this.updateProgress();
     this.speakPrompt(); // auto-play once on appearance
   }
@@ -294,7 +291,13 @@ export class BattleScene extends Phaser.Scene {
 
   private speakPrompt(): void {
     const prompt = this.battle.prompts[this.promptIndex];
-    this.speech.say(spokenInstructionFor(prompt));
+    // Say the instruction, then repeat the target word slowly and clearly so a
+    // young child can hear the pronunciation distinctly.
+    const word = prompt.targetWords[0];
+    const text = prompt.spokenPrompt
+      ? prompt.spokenPrompt
+      : `Find the word. ${word}. ${word}.`;
+    this.speech.say(text);
   }
 
   private onCardTap(card: CardView): void {
