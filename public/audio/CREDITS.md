@@ -19,3 +19,14 @@ All sound effects are from **Kenney** (https://kenney.nl) and are licensed
 
 To change a sound, drop a replacement `.mp3` here with the same filename (or
 update the keys in `src/scenes/BootScene.ts` and `src/game/elements.ts`).
+
+## Voice (`voice/`)
+
+- `p0.mp3`…`pN.mp3` — **word-reading** for each prompt, a **male voice**
+  (Windows "Microsoft David"), pre-baked by `tools/gen-voice.ps1`. Browser TTS
+  is the runtime fallback if a clip is missing. These are system-TTS output
+  (no third-party license). Re-run the generator when prompts change.
+- `vo_correct.mp3`, `vo_win.mp3` — **Kenney Voiceover Pack** (CC0), Male voice,
+  used for the "Correct!" and "You win!" callouts. The Kenney pack is a fixed
+  phrase set and does **not** contain vocabulary words, so it can't read the
+  target words — hence the David clips above.

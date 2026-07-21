@@ -297,14 +297,16 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private speakPrompt(): void {
+    // Prefer the baked male-voice clip; fall back to browser TTS if it's missing
+    // (e.g. content added without regenerating audio).
+    const key = `voice-p${this.promptIndex}`;
+    if (this.cache.audio.exists(key)) {
+      this.sound.play(key, { volume: 1 });
+      return;
+    }
     const prompt = this.battle.prompts[this.promptIndex];
-    // Say the instruction, then repeat the target word slowly and clearly so a
-    // young child can hear the pronunciation distinctly.
     const word = prompt.targetWords[0];
-    const text = prompt.spokenPrompt
-      ? prompt.spokenPrompt
-      : `Find the word. ${word}. ${word}.`;
-    this.speech.say(text);
+    this.speech.say(prompt.spokenPrompt ?? `Find the word. ${word}. ${word}.`);
   }
 
   private onCardTap(card: CardView): void {
@@ -339,7 +341,8 @@ export class BattleScene extends Phaser.Scene {
         return;
       }
       if (outcome.complete) {
-        this.time.delayedCall(600, () => this.advance());
+        this.sound.play("vo-correct", { volume: 0.9 }); // male "Correct!"
+        this.time.delayedCall(700, () => this.advance());
       } else {
         this.inputLocked = false; // more target words remain this turn
       }
@@ -385,7 +388,8 @@ export class BattleScene extends Phaser.Scene {
     this.tweens.add({ targets: this.enemy, angle: 90, y: ENEMY.y + 60, alpha: 0.25, duration: 700, ease: "Cubic.easeIn" });
 
     this.time.delayedCall(500, () => {
-      this.sound.play("win", { volume: 0.7 });
+      this.sound.play("win", { volume: 0.6 });
+      this.sound.play("vo-win", { volume: 1 }); // male "You win!"
       confetti(this, W / 2, 200);
       this.add
         .text(W / 2, 300, "YOU DID IT!", {

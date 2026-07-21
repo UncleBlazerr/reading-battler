@@ -6,6 +6,37 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-07-20 — Iteration 4: Male-voice word reading
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **Male voice reads the words.** Pre-baked one audio clip per prompt using the
+  Windows "Microsoft David" (Male) voice via `tools/gen-voice.ps1` (reads the
+  battle JSON, synthesizes `public/audio/voice/pN.mp3`). `speakPrompt` plays the
+  baked clip; browser TTS remains the fallback if a clip is missing.
+  - **Why baked, not the Kenney voiceover pack:** that pack is a fixed phrase
+    set (numbers, "correct", "you win", war callouts) with **no vocabulary
+    words**, so it cannot read "dog"/"big"/etc. Baked David audio also plays
+    consistently on iPad (no device-TTS dependency).
+- **Kenney male callouts (CC0)** used where they fit: **"Correct!"** on each
+  completed prompt, **"You win!"** on victory.
+
+### Verified
+
+Build + typecheck · 12/12 tests · headless playthrough clean · voice clips serve
+(200) and have valid durations (prompt clips ~3–5s, callouts <1s). Audible
+pronunciation quality should be confirmed on-device (David is the standard
+Windows voice).
+
+### Still open
+
+Picture-assist toggle · tablet playtest (now also confirms the baked VO) ·
+then Level + comprehension boss.
+
+---
+
 ## 2026-07-20 — Iteration 3: Kenney sprite art (UI + monster)
 
 **Status: complete and verified.**
