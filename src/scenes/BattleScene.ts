@@ -306,7 +306,7 @@ export class BattleScene extends Phaser.Scene {
     }
     const prompt = this.battle.prompts[this.promptIndex];
     const word = prompt.targetWords[0];
-    this.speech.say(prompt.spokenPrompt ?? `Find the word. ${word}. ${word}.`);
+    this.speech.say(prompt.spokenPrompt ?? `Find the word, ${word}.`);
   }
 
   private onCardTap(card: CardView): void {

@@ -29,7 +29,7 @@ foreach ($p in $battle.prompts) {
     $phrase = $p.spokenPrompt
   } else {
     $w = $p.targetWords[0]
-    $phrase = "Find the word. $w. $w."
+    $phrase = "Find the word, $w."
   }
   $wav = "$outDir\p$i.wav"
   $mp3 = "$outDir\p$i.mp3"
