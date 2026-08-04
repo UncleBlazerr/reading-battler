@@ -1,0 +1,11 @@
+Spell effect art (orb-*.png projectiles, boom-*.png explosion sprite sheets)
+
+Original pixel art created for reading-battler — the fire/ice/lightning
+projectile orbs and their impact explosions. Authored procedurally in
+tools/gen-effects.py (Python/Pillow). Not derived from any third-party asset.
+
+Style note: the chunky pixel fireball / explosion / lightning look was inspired
+by reference images the project owner supplied, but the shapes, frames, and
+palettes here are our own.
+
+License: public domain (CC0). Free to use in any project.

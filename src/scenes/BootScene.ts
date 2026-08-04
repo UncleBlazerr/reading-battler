@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { ELEMENT_ORDER, ELEMENTS } from "../game/elements";
+import { BOOM_FRAME, ELEMENT_ORDER, ELEMENTS, boomAnim } from "../game/elements";
 import battleData from "../content/battle-01.json";
 import type { FindWordBattle } from "../content/types";
 import { ALL_ENEMIES } from "../content/enemies";
@@ -20,6 +20,13 @@ export class BootScene extends Phaser.Scene {
     this.load.audio("win", "audio/win.mp3");
     for (const el of ELEMENT_ORDER) {
       this.load.audio(ELEMENTS[el].sound, `audio/${ELEMENTS[el].sound}.mp3`);
+      // Pixel-art spell FX (tools/gen-effects.py): a projectile orb + a 5-frame
+      // explosion sprite sheet per element.
+      this.load.image(ELEMENTS[el].orb, `assets/fx/${ELEMENTS[el].orb}.png`);
+      this.load.spritesheet(ELEMENTS[el].boom, `assets/fx/${ELEMENTS[el].boom}.png`, {
+        frameWidth: BOOM_FRAME,
+        frameHeight: BOOM_FRAME,
+      });
     }
 
     // Kenney CC0 UI sprite art (UI Pack: Adventure).
@@ -60,6 +67,16 @@ export class BootScene extends Phaser.Scene {
     g.fillCircle(8, 8, 8);
     g.generateTexture("spark", 16, 16);
     g.destroy();
+
+    // Explosion animations (one per element), played on the enemy at impact.
+    for (const el of ELEMENT_ORDER) {
+      this.anims.create({
+        key: boomAnim(el),
+        frames: this.anims.generateFrameNumbers(ELEMENTS[el].boom, { start: 0, end: 4 }),
+        frameRate: 18,
+        repeat: 0,
+      });
+    }
 
     this.scene.start("Start");
   }

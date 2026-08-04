@@ -3,7 +3,7 @@
 // number. All code/particle-driven — no sprite assets (grilling decision).
 
 import Phaser from "phaser";
-import { ELEMENTS } from "./elements";
+import { ELEMENTS, boomAnim } from "./elements";
 import type { Element } from "../content/types";
 
 /**
@@ -25,17 +25,18 @@ export function playAttack(
   // Trailing particles that follow the projectile.
   const trail = scene.add.particles(fromX, fromY, "spark", {
     speed: { min: 20, max: 80 },
-    scale: { start: 0.9, end: 0 },
-    alpha: { start: 0.9, end: 0 },
-    lifespan: 300,
-    frequency: 15,
+    scale: { start: 0.7, end: 0 },
+    alpha: { start: 0.8, end: 0 },
+    lifespan: 260,
+    frequency: 16,
     tint: style.color,
     blendMode: Phaser.BlendModes.ADD,
   });
   trail.setDepth(50);
 
-  const projectile = scene.add.circle(fromX, fromY, 16, style.accent).setDepth(51);
-  projectile.setStrokeStyle(4, style.color);
+  // The pixel-art projectile orb (rotated to face its direction of travel).
+  const projectile = scene.add.image(fromX, fromY, style.orb).setDepth(51).setScale(0.6);
+  projectile.setRotation(Phaser.Math.Angle.Between(fromX, fromY, toX, toY));
 
   scene.tweens.add({
     targets: [projectile],
@@ -55,32 +56,27 @@ export function playAttack(
   });
 }
 
-/** A radial particle burst + flash at the impact point. */
+/** The pixel-art explosion sprite (per element) plus a couple of flying sparks. */
 function burst(scene: Phaser.Scene, element: Element, x: number, y: number): void {
   const style = ELEMENTS[element];
 
-  const flash = scene.add.circle(x, y, 60, style.accent, 0.8).setDepth(52);
-  scene.tweens.add({
-    targets: flash,
-    scale: 2.2,
-    alpha: 0,
-    duration: 260,
-    ease: "Cubic.easeOut",
-    onComplete: () => flash.destroy(),
-  });
+  const boom = scene.add.sprite(x, y, style.boom).setDepth(53).setScale(1.15);
+  boom.play(boomAnim(element));
+  boom.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => boom.destroy());
 
+  // A few extra sparks kicking outward for weight.
   const emitter = scene.add.particles(x, y, "spark", {
-    speed: { min: 120, max: 340 },
-    scale: { start: 1.2, end: 0 },
+    speed: { min: 120, max: 300 },
+    scale: { start: 0.9, end: 0 },
     alpha: { start: 1, end: 0 },
-    lifespan: { min: 300, max: 650 },
+    lifespan: { min: 250, max: 520 },
     tint: [style.color, style.accent],
     blendMode: Phaser.BlendModes.ADD,
     emitting: false,
   });
   emitter.setDepth(52);
-  emitter.explode(28);
-  scene.time.delayedCall(700, () => emitter.destroy());
+  emitter.explode(16);
+  scene.time.delayedCall(600, () => emitter.destroy());
 }
 
 /** Floating "-20" style damage number that rises and fades. */

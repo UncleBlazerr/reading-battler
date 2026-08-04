@@ -6,6 +6,42 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-08-03 — Iteration 11: Pixel-art spell effects
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **Chunky pixel-art projectiles + explosions per element**, replacing the plain
+  tinted-circle projectile and generic particle burst.
+  - **Projectile orbs** — a glowing fireball with a comet flame tail, an ice
+    crystal shard with a frost trail, and a crackling lightning ball with a
+    jagged bolt tail. The orb rotates to face its travel direction; a faint
+    tinted particle trail follows it.
+  - **Explosions** — a 5-frame sprite sheet per element played on the enemy at
+    impact: a flame burst (fire), shattering shards (ice), and radiating electric
+    arcs (lightning), plus a few flying sparks and the existing screen shake.
+- **Generator** `tools/gen-effects.py` (Python/Pillow) draws the orbs + explosion
+  sheets from solid concentric colours (no alpha, so they pop on the dark stage),
+  nearest-upscaled ×4. Original CC0 art (attribution in `public/assets/fx/`).
+- Wiring: `ELEMENTS` gains `orb`/`boom` texture keys + `boomAnim`; BootScene
+  loads them and builds one explosion anim per element; `effects.ts#playAttack`
+  swaps in the orb sprite and plays the explosion on impact.
+
+### Verified
+
+Typecheck + build clean · 26/26 tests · FX preview sheet + a battle-scale
+composite confirm the orb and explosion read well and are sized right over the
+enemy (the frame-by-frame playback is standard Phaser anim; worth an on-device
+glance).
+
+### Still open
+
+Picture-assist toggle · tablet playtest · could add a cast flash at the player's
+hand and an element-tinted hit flash on the enemy.
+
+---
+
 ## 2026-08-03 — Iteration 10: World-map node loading screen
 
 **Status: complete and verified.**

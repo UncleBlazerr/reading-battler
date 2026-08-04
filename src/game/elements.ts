@@ -9,19 +9,31 @@ export type ElementChoice = Element | "auto";
 export interface ElementStyle {
   label: string;
   emoji: string;
-  /** Core tint for particles/projectile. */
+  /** Core tint for particles/trail. */
   color: number;
   /** Lighter accent for flashes. */
   accent: number;
   /** Audio key (loaded in BootScene) for the attack whoosh. */
   sound: string;
+  /** Texture key of the pixel-art projectile orb (tools/gen-effects.py). */
+  orb: string;
+  /** Texture key of the 5-frame explosion sprite sheet (impact on the enemy). */
+  boom: string;
 }
 
 export const ELEMENTS: Record<Element, ElementStyle> = {
-  fire: { label: "Fire", emoji: "🔥", color: 0xff6b35, accent: 0xffd166, sound: "fire" },
-  lightning: { label: "Lightning", emoji: "⚡", color: 0xffe14d, accent: 0xffffff, sound: "lightning" },
-  ice: { label: "Ice", emoji: "❄️", color: 0x6bd6ff, accent: 0xe3f6ff, sound: "ice" },
+  fire: { label: "Fire", emoji: "🔥", color: 0xff6b35, accent: 0xffd166, sound: "fire", orb: "orb-fire", boom: "boom-fire" },
+  lightning: { label: "Lightning", emoji: "⚡", color: 0xffe14d, accent: 0xffffff, sound: "lightning", orb: "orb-lightning", boom: "boom-lightning" },
+  ice: { label: "Ice", emoji: "❄️", color: 0x6bd6ff, accent: 0xe3f6ff, sound: "ice", orb: "orb-ice", boom: "boom-ice" },
 };
+
+/** Anim key for an element's explosion (created in BootScene). */
+export function boomAnim(el: Element): string {
+  return `fx-${el}`;
+}
+
+/** Native explosion frame size × SCALE (see tools/gen-effects.py). */
+export const BOOM_FRAME = 192;
 
 export const ELEMENT_ORDER: Element[] = ["fire", "lightning", "ice"];
 
