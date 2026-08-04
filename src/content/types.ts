@@ -7,7 +7,7 @@
 // it later — see ADR 0002 (no runtime LLM).
 
 /** A cosmetic-only attack element. Damage is never affected by the choice. */
-export type Element = "fire" | "lightning" | "ice";
+export type Element = "fire" | "lightning" | "ice" | "energy";
 
 /** One turn of a find-the-word battle: the child must tap `targetWords`. */
 export interface FindWordPrompt {

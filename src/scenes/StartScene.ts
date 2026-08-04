@@ -43,13 +43,16 @@ export class StartScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Element chips: Auto + the three elements.
+    // Element chips: Auto + every element. Chip width adapts to the count so the
+    // row always fits (Auto + 4 elements would overflow a fixed 190px width).
     const options: { key: ElementChoice; label: string }[] = [
       { key: "auto", label: "🎲 Auto" },
       ...ELEMENT_ORDER.map((e) => ({ key: e as ElementChoice, label: `${ELEMENTS[e].emoji} ${ELEMENTS[e].label}` })),
     ];
-    const chipW = 190;
-    const gap = 20;
+    const gap = 16;
+    const maxRowW = W - 60; // side margins
+    const chipW = Math.min(190, Math.floor((maxRowW - (options.length - 1) * gap) / options.length));
+    const fontSize = chipW < 170 ? 20 : 23;
     const totalW = options.length * chipW + (options.length - 1) * gap;
     let x = W / 2 - totalW / 2 + chipW / 2;
     for (const opt of options) {
@@ -59,7 +62,7 @@ export class StartScene extends Phaser.Scene {
         .text(x, 371, opt.label, {
           fontFamily: "Arial, sans-serif",
           fontStyle: "bold",
-          fontSize: "23px",
+          fontSize: `${fontSize}px`,
           color: "#4a2f16",
         })
         .setOrigin(0.5);

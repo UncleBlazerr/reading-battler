@@ -25,6 +25,7 @@ export const ELEMENTS: Record<Element, ElementStyle> = {
   fire: { label: "Fire", emoji: "🔥", color: 0xff6b35, accent: 0xffd166, sound: "fire", orb: "orb-fire", boom: "boom-fire" },
   lightning: { label: "Lightning", emoji: "⚡", color: 0xffe14d, accent: 0xffffff, sound: "lightning", orb: "orb-lightning", boom: "boom-lightning" },
   ice: { label: "Ice", emoji: "❄️", color: 0x6bd6ff, accent: 0xe3f6ff, sound: "ice", orb: "orb-ice", boom: "boom-ice" },
+  energy: { label: "Energy", emoji: "⚛️", color: 0x9ee84f, accent: 0xd4ff8f, sound: "energy", orb: "orb-energy", boom: "boom-energy" },
 };
 
 /** Anim key for an element's explosion (created in BootScene). */
@@ -35,7 +36,7 @@ export function boomAnim(el: Element): string {
 /** Native explosion frame size × SCALE (see tools/gen-effects.py). */
 export const BOOM_FRAME = 192;
 
-export const ELEMENT_ORDER: Element[] = ["fire", "lightning", "ice"];
+export const ELEMENT_ORDER: Element[] = ["fire", "lightning", "ice", "energy"];
 
 /**
  * Resolves the element to use for a given hit. When the player chose a specific

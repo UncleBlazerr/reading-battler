@@ -12,6 +12,7 @@ All sound effects are from **Kenney** (https://kenney.nl) and are licensed
 | `fire.mp3` | Impact — `impactSoft_medium_000` | Fire attack cast |
 | `lightning.mp3` | Interface — `glitch_002` | Lightning attack cast |
 | `ice.mp3` | Impact — `impactGlass_light_000` | Ice attack cast |
+| `energy.mp3` | Interface — `glitch_002` (copy of lightning) | Energy attack cast |
 | `impact.mp3` | Impact — `impactGeneric_light_000` | Attack landing hit |
 | `tap.mp3` | Interface — `click_001` | Selecting a word card |
 | `wrong.mp3` | Interface — `back_001` | Soft-fail (wrong tap) |

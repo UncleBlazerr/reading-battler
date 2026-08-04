@@ -66,6 +66,9 @@ ICE = dict(edge=(40, 96, 196, 255), mid=(88, 190, 250, 255), hot=(180, 236, 255,
            core=(244, 252, 255, 255), ember=(120, 170, 220, 255))
 BOLT = dict(edge=(120, 60, 210, 255), mid=(168, 96, 240, 255), hot=(150, 224, 255, 255),
             core=(244, 244, 255, 255), ember=(90, 60, 160, 255))
+# Energy — toxic-lime plasma (dark green core, bright lime crackle).
+ENERGY = dict(edge=(46, 120, 44, 255), mid=(108, 196, 66, 255), hot=(176, 236, 92, 255),
+              core=(226, 255, 178, 255), ember=(38, 92, 34, 255))
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +118,27 @@ def orb_lightning():
         x2, y2 = cx + math.cos(a) * 15, cy + math.sin(a) * 15
         d.line([(x1, y1), (x2, y2)], fill=BOLT["hot"], width=1)
     save(img, "orb-lightning")
+
+
+def orb_energy():
+    img, d = new(ORB_W, ORB_H)
+    cx, cy = 30, 13
+    p = ENERGY
+    # plasma comet tail (green streaks + a wisp of crackle)
+    d.polygon([(cx, 5), (cx, 21), (2, 13)], fill=p["edge"])
+    d.polygon([(cx, 8), (cx, 18), (8, 13)], fill=p["mid"])
+    d.line([(cx, 13), (20, 9), (13, 16), (5, 12)], fill=p["hot"], width=1)
+    # crackling plasma ball
+    blob(d, cx, cy, [(12, p["edge"]), (10, p["mid"]), (6, p["hot"]), (3, p["core"])])
+    # dense spark spikes all around
+    for ang in range(0, 360, 30):
+        a = math.radians(ang)
+        x1, y1 = cx + math.cos(a) * 11, cy + math.sin(a) * 11
+        x2, y2 = cx + math.cos(a) * 15.5, cy + math.sin(a) * 15.5
+        d.line([(x1, y1), (x2, y2)], fill=p["hot"], width=1)
+    for (ex, ey) in [(24, 6), (34, 19), (26, 20), (36, 8)]:
+        d.point((ex, ey), fill=p["core"])
+    save(img, "orb-energy")
 
 
 # ---------------------------------------------------------------------------
@@ -216,6 +240,30 @@ def boom_lightning():
     sheet("boom-lightning", frame)
 
 
+def boom_energy():
+    """A green plasma burst — spiky flames plus crackling lime arcs."""
+    def frame(d, cx, cy, i):
+        p = ENERGY
+        if i == 0:
+            blob(d, cx, cy, [(7, p["hot"]), (4, p["core"])])
+        elif i == 1:
+            flame_spikes(d, cx, cy, 10, 8, 15, [(p["edge"], 4), (p["mid"], 2)], 4, taper=2)
+            blob(d, cx, cy, [(11, p["mid"]), (6, p["hot"]), (3, p["core"])])
+        elif i == 2:
+            flame_spikes(d, cx, cy, 12, 10, 22, [(p["edge"], 4), (p["mid"], 2), (p["hot"], 1)], 8, taper=3)
+            bolt_spikes(d, cx, cy, 8, 8, 21, p["hot"], 14, width=1)
+            blob(d, cx, cy, [(12, p["edge"]), (9, p["mid"]), (5, p["hot"]), (2, p["core"])])
+        elif i == 3:
+            flame_spikes(d, cx, cy, 12, 12, 23, [(p["edge"], 2), (p["mid"], 1)], 12, taper=1)
+            bolt_spikes(d, cx, cy, 8, 10, 23, p["hot"], 18, width=1)
+            blob(d, cx, cy, [(9, p["ember"]), (5, p["mid"])])
+            _embers(d, cx, cy, 14, 22, p["hot"], 7)
+        else:
+            blob(d, cx, cy, [(6, p["ember"])])
+            _embers(d, cx, cy, 8, 22, p["mid"], 9)
+    sheet("boom-energy", frame)
+
+
 def _embers(d, cx, cy, r0, r1, col, seed):
     rnd = _Rnd(seed)
     for _ in range(10):
@@ -226,8 +274,8 @@ def _embers(d, cx, cy, r0, r1, col, seed):
 
 # ---------------------------------------------------------------------------
 def preview():
-    names = ["orb-fire", "orb-ice", "orb-lightning",
-             "boom-fire", "boom-ice", "boom-lightning"]
+    names = ["orb-fire", "orb-ice", "orb-lightning", "orb-energy",
+             "boom-fire", "boom-ice", "boom-lightning", "boom-energy"]
     imgs = [Image.open(f"{ROOT}/public/assets/fx/{n}.png") for n in names]
     pad = 12
     bg = (24, 24, 32, 255)
@@ -243,7 +291,7 @@ def preview():
 
 
 if __name__ == "__main__":
-    orb_fire(); orb_ice(); orb_lightning()
-    boom_fire(); boom_ice(); boom_lightning()
+    orb_fire(); orb_ice(); orb_lightning(); orb_energy()
+    boom_fire(); boom_ice(); boom_lightning(); boom_energy()
     preview()
     print("done")

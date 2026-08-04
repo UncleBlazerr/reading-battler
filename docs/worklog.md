@@ -6,6 +6,38 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-08-03 — Iteration 12: Energy element
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **New "Energy" attack element** (⚛️) — a toxic-lime plasma in the same
+  cosmetic-only element system as fire/lightning/ice. Added `"energy"` to the
+  `Element` union, an `ELEMENTS.energy` style, and appended it to
+  `ELEMENT_ORDER` (so it appears on the start-screen picker and in Auto rotation).
+- **Energy FX art** (`tools/gen-effects.py`): `orb-energy` — a crackling green
+  plasma ball with spark spikes and a green comet tail — and `boom-energy` — a
+  5-frame green plasma burst mixing spiky flames with lime crackle. Original CC0,
+  inspired by an "energy ball" reference but drawn from scratch.
+- **Audio:** `energy.mp3` reuses the lightning whoosh (noted in
+  `public/audio/CREDITS.md`).
+- **Start screen:** the element-chip row now sizes chips adaptively so Auto + 4
+  elements fit (a fixed 190px width would have overflowed).
+
+### Verified
+
+Typecheck + build clean · 26/26 tests · FX preview sheet shows the energy orb +
+explosion reading well beside the other three; all energy assets serve (200);
+no console errors. On-device glance still worth it for the animation + the
+5-chip start row.
+
+### Still open
+
+Picture-assist toggle · tablet playtest · cast/hit flashes.
+
+---
+
 ## 2026-08-03 — Iteration 11: Pixel-art spell effects
 
 **Status: complete and verified.**
