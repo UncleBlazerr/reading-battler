@@ -3,3 +3,6 @@ dist/
 .DS_Store
 *.local
 .vite/
+tools/_*.png
+tools/__pycache__/
+.claude/settings.local.json

@@ -1,0 +1,13 @@
+Castle room backgrounds (room-*.png) and the transition screen
+(screen-transition.png)
+
+Original pixel art created for reading-battler — the castle rooms the player
+climbs through, plus the between-rooms loading screen. Authored procedurally in
+tools/gen-backgrounds.py (Python/Pillow). Not derived from any third-party asset
+pack or image.
+
+Style note: the moody, limited-palette castle look was inspired by reference
+images the project owner supplied, but the room layouts, decorations, palettes,
+and every drawn element here are our own.
+
+License: public domain (CC0). Free to use in any project.

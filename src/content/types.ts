@@ -23,14 +23,19 @@ export interface FindWordPrompt {
   spokenPrompt?: string;
 }
 
+/** Shared enemy shape for every battle kind. */
+export interface BattleEnemy {
+  name: string;
+  maxHp: number;
+}
+
 export interface FindWordBattle {
+  /** Discriminator for the battle kind (see `Battle`). */
+  kind: "find";
   id: string;
   title: string;
   /** The enemy the child is fighting. */
-  enemy: {
-    name: string;
-    maxHp: number;
-  };
+  enemy: BattleEnemy;
   /**
    * The sentence, tokenized into the words shown on screen. Word cards are
    * rendered in this order; the child taps the correct one. The other words
@@ -41,3 +46,32 @@ export interface FindWordBattle {
   prompts: FindWordPrompt[];
   difficultyTier: number;
 }
+
+/**
+ * One word the child must spell by dragging grapheme tiles into ordered slots.
+ * `tiles` is the correct spelling *segmented into graphemes* — single letters
+ * (`["d","o","g"]`) or compound sounds (`["ch","e","ss"]`, `["k","i","ng"]`).
+ * `distractors` are extra wrong tiles mixed into the tray; the child must pick
+ * the correct ones. The board is solved when every slot holds the right
+ * grapheme in order.
+ */
+export interface SpellWordPrompt {
+  word: string;
+  tiles: string[];
+  distractors: string[];
+  /** Damage dealt when the word is spelled correctly. */
+  damage: number;
+}
+
+export interface SpellBattle {
+  kind: "spell";
+  id: string;
+  title: string;
+  enemy: BattleEnemy;
+  /** Ordered list of words to spell this battle. */
+  words: SpellWordPrompt[];
+  difficultyTier: number;
+}
+
+/** Any battle the ladder can hand to the BattleScene. */
+export type Battle = FindWordBattle | SpellBattle;

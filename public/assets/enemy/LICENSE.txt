@@ -1,11 +1,11 @@
-Player character sprites (idle.png, attack.png, cheer.png)
+Enemy sprite (word-goblin.png)
 
-Original pixel art created for reading-battler — the young "word mage" hero.
+Original pixel art created for reading-battler — the "Word Goblin" boss.
 Authored procedurally in tools/gen-sprites.py (Python/Pillow). Not derived from
 any third-party asset pack.
 
 Style note: the chunky "sticker outline" pixel-art look was inspired by a couple
-of reference sheets the project owner supplied, but the character design,
+of reference sheets the project owner supplied, but the creature design,
 proportions, and palette here are our own.
 
 License: public domain (CC0). Free to use in any project.

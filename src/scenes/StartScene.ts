@@ -28,7 +28,7 @@ export class StartScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(W / 2, 190, "Find the words. Beat the goblin!", {
+      .text(W / 2, 190, "Find the words. Climb the monster ladder!", {
         fontFamily: "Arial, sans-serif",
         fontSize: "26px",
         color: "#9aa0b5",
@@ -82,6 +82,7 @@ export class StartScene extends Phaser.Scene {
       .setOrigin(0.5);
     play.on("pointerdown", () => {
       this.registry.set("element", this.choice);
+      this.registry.set("level", 1); // start every run at the bottom of the ladder
       this.scene.start("Battle");
     });
   }
