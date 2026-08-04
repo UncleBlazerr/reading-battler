@@ -35,6 +35,10 @@ export const BOSS_ROOMS: RoomDef[] = [
 export const TRANSITION_KEY = "screen-transition";
 export const TRANSITION_FILE = "assets/bg/screen-transition.png";
 
+/** The world-map terrain the between-levels node walk is drawn over. */
+export const MAP_KEY = "screen-map";
+export const MAP_FILE = "assets/bg/screen-map.png";
+
 /** Everything BootScene needs to preload. */
 export const ALL_ROOMS: RoomDef[] = [...ROOMS, ...BOSS_ROOMS];
 

@@ -120,7 +120,8 @@ are exported for it.
   or one-shot guard flags carry over. (This class of bug hung the ladder after
   level 2: `TransitionScene.advanced` wasn't reset in `create()`.)
 - `win()` is shared: it advances `level` and routes through `TransitionScene`
-  (the castle "loading" screen) to the next battle.
+  (the world-map node walk — the hero hops from the cleared level's node to the
+  new one, climbing toward the tower) to the next battle.
 - Only level 1 has baked voice; generated levels use browser TTS (the fallback).
 
 ## Verify before calling it done

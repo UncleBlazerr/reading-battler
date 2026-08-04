@@ -6,6 +6,42 @@ decisions live in `docs/adr/`, not here.
 
 ---
 
+## 2026-08-03 — Iteration 10: World-map node loading screen
+
+**Status: complete and verified.**
+
+### What shipped
+
+- **The between-levels loading screen is now a world-map walk.** Instead of the
+  static starfield/castle, `TransitionScene` draws a winding dirt trail of level
+  nodes (Mario-Party-style stepping dots) climbing from the grassy lowlands up to
+  the castle/tower, and the **hero hops from the just-cleared level's node to the
+  new level's node** — a visible rung of the endless climb.
+  - Nodes are labelled relative to the current level (cleared = darker green,
+    the level you're about to play = gold and pulsing, upcoming = green, bosses =
+    a red 👑 node). The tower is the ever-present goal at the top-right.
+  - Hero walks in small parabolic hops (dot to dot) with a squash-bounce, then a
+    sparkle puff on arrival. Header names the level + room; loading bar + tap to
+    skip retained.
+- **New map terrain art** `screen-map.png` (original, chunky style) authored in
+  `tools/gen-backgrounds.py#screen_map` — sky, snow-capped peaks, rolling green
+  hills with trees, a craggy mountainside rising to a tower. Path/nodes/hero are
+  drawn live in Phaser on top so they scale with the level.
+
+### Verified
+
+Typecheck + build clean · 26/26 tests · a real in-engine screenshot confirms the
+map, trail, numbered nodes, and hero placement render correctly (the hop
+animation runs in normal play; a backgrounded tab pauses the loop).
+
+### Still open
+
+Picture-assist toggle · tablet playtest · could scroll the trail so the hero
+appears progressively higher over many levels (currently a repeating one-rung
+walk with changing numbers).
+
+---
+
 ## 2026-08-03 — Iteration 9: "Spell the word" quest type
 
 **Status: complete and verified.**

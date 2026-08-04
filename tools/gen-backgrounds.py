@@ -413,10 +413,86 @@ def screen_transition():
     return cv.save("screen-transition")
 
 
+def screen_map():
+    """World-map loading art: a storybook overland that climbs from the grassy
+    lowlands (bottom-left) up past mountains to the castle/tower (top-right).
+    The winding path of level nodes + the walking hero are drawn on top in the
+    TransitionScene, so this is just the terrain. Original, chunky-flat style."""
+    cv = BG()
+
+    def tree(x, y, s=1.0):
+        w = int(8 * s)
+        cv.rect(x - 1, y, x + 1, y + int(6 * s), (86, 62, 40, 255))          # trunk
+        cv.d.ellipse([x - w, y - int(12 * s), x + w, y + 2], (46, 108, 54, 255))
+        cv.d.ellipse([x - w, y - int(12 * s), x + w - 3, y - 2], (66, 140, 68, 255))
+        cv.d.ellipse([x - w + 2, y - int(11 * s), x + w - 6, y - 5], (96, 176, 92, 255))
+
+    def hill(y0, y1, back, front):
+        cv.vgrad(0, y0, NW, y1, back, front)
+
+    # --- sky + distant peaks ---
+    cv.vgrad(0, 0, NW, 74, (122, 170, 214), (186, 210, 224))
+    for i in range(5):                                                       # soft clouds
+        cx, cy = 20 + i * 52, 12 + (i % 2) * 10
+        cv.d.ellipse([cx, cy, cx + 26, cy + 8], (230, 238, 244, 255))
+        cv.d.ellipse([cx + 12, cy - 4, cx + 38, cy + 6], (230, 238, 244, 255))
+    # far mountain range
+    for mx, mh, col in [(30, 40, (120, 128, 150)), (95, 52, (104, 112, 138)),
+                        (150, 46, (120, 128, 150)), (205, 58, (98, 108, 134))]:
+        cv.d.polygon([(mx - 34, 82), (mx, 82 - mh), (mx + 34, 82)], fill=(*col, 255))
+        cv.d.polygon([(mx - 10, 82 - mh + 12), (mx, 82 - mh), (mx + 10, 82 - mh + 12)],
+                     fill=(226, 232, 240, 255))                              # snow cap
+
+    # --- rolling green land ---
+    cv.rect(0, 74, NW, NH, (58, 126, 60, 255))   # base fill so there are no gaps
+    hill(66, 110, (74, 150, 74), (58, 128, 60))
+    cv.d.ellipse([-40, 92, 150, 220], (86, 164, 84, 255))                    # lit knoll (left)
+    cv.d.ellipse([120, 104, 320, 240], (66, 138, 66, 255))                   # shaded knoll (right)
+    hill(120, NH, (60, 128, 60), (44, 104, 48))                             # foreground grass
+    # scattered rocks + tufts
+    rnd = _Rnd(21)
+    for _ in range(22):
+        gx, gy = int(rnd.rand() * NW), 96 + int(rnd.rand() * (NH - 100))
+        cv.d.ellipse([gx, gy, gx + 3, gy + 2], (52, 116, 54, 255))
+
+    # --- craggy mountainside on the right, rising to the tower ---
+    cv.d.polygon([(150, NH), (180, 60), (240, 30), (240, NH)], fill=(96, 92, 108, 255))
+    cv.d.polygon([(168, NH), (196, 66), (240, 46), (240, NH)], fill=(120, 116, 132, 255))
+    cv.d.polygon([(150, NH), (176, 74), (196, 96), (176, NH)], fill=(80, 78, 96, 255))
+    for _ in range(16):                                                      # rocky speckle
+        rx, ry = 158 + int(rnd.rand() * 78), 60 + int(rnd.rand() * 90)
+        cv.d.point((rx, ry), fill=(150, 146, 160, 160))
+
+    # --- the castle / tower at the summit (top-right) ---
+    tx, ty = 206, 42
+    stone, stone_lt, stone_dk = (150, 150, 164, 255), (188, 188, 200, 255), (108, 108, 126, 255)
+    cv.rect(tx - 12, ty, tx + 12, ty + 26, stone)                            # keep
+    cv.rect(tx + 8, ty, tx + 12, ty + 26, stone_dk)
+    for cxx in range(tx - 12, tx + 12, 6):                                   # crenellations
+        cv.rect(cxx, ty - 4, cxx + 3, ty, stone)
+    cv.rect(tx - 6, ty - 18, tx + 6, ty, stone_lt)                           # tall tower
+    cv.d.polygon([(tx - 8, ty - 18), (tx + 8, ty - 18), (tx, ty - 30)], fill=(184, 74, 66, 255))  # red roof
+    cv.rect(tx + 1, ty - 34, tx + 2, ty - 30, (200, 90, 80, 255))            # flagpole
+    cv.d.polygon([(tx + 2, ty - 34), (tx + 9, ty - 32), (tx + 2, ty - 30)], fill=(230, 200, 90, 255))
+    cv.rect(tx - 2, ty + 14, tx + 2, ty + 26, (60, 44, 40, 255))            # gate
+    for wx, wy in [(tx - 8, ty + 6), (tx + 5, ty + 6), (tx - 2, ty - 12)]:
+        cv.rect(wx, wy, wx + 2, wy + 3, (255, 214, 120, 255))               # lit windows
+
+    # a few trees dotted along the lowlands
+    for (tx2, ty2, s) in [(24, 132, 1.2), (60, 150, 1.0), (100, 120, 0.9),
+                          (18, 108, 0.8), (128, 150, 1.1), (86, 138, 0.8)]:
+        tree(tx2, ty2, s)
+
+    cv.overlay(0, 0, NW, 12, (0, 0, 0, 40))
+    cv.vignette(corner=120)
+    return cv.save("screen-map")
+
+
 # ---------------------------------------------------------------------------
 def preview():
     slugs = ["room-gatehouse", "room-hall", "room-library", "room-dungeon",
-             "room-tower", "room-chapel", "room-throne", "screen-transition"]
+             "room-tower", "room-chapel", "room-throne", "screen-transition",
+             "screen-map"]
     imgs = [Image.open(f"{ROOT}/public/assets/bg/{s}.png") for s in slugs]
     pad = 16
     cols = 2
@@ -442,5 +518,6 @@ if __name__ == "__main__":
     room_chapel()
     room_throne_boss()
     screen_transition()
+    screen_map()
     preview()
     print("done")
